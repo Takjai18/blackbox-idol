@@ -1,0 +1,11 @@
+name = "blackbox-idol"
+main = "worker.js"
+compatibility_date = "2025-05-01"
+
+[[durable_objects.bindings]]
+name = "BLACKBOX_ROOM"
+class_name = "BlackboxRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BlackboxRoom"]

@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>📦 黑盒造神：Sol / Luna / Terra / Astra</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&amp;display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer=""></script>
+  
+  <style>
+    :root {
+      --game-pink-bg: #F08CAE;
+      --game-pink-btn: #E63E7A;
+      --game-yellow-bg: #F3C242;
+      --game-brown-text: #4A3222;
+      --game-orange-bg: #EA6A00;
+      --game-blue-bg: #1EA1E8;
+      --game-blue-tag: #0D74B8;
+      --game-green-bg: #5CB346;
+      --game-taupe-bg: #916E57;
+
+      --box-sol: #E69F26;
+      --box-luna: #3A7CA5;
+      --box-terra: #4E9A51;
+      --box-astra: #7C4DBA;
+
+      --radius-card: 28px;
+      --shadow-card: 0 10px 24px rgba(74, 50, 34, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Noto Sans TC', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+      background: var(--game-pink-bg);
+      color: var(--game-brown-text);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    body.phase-theme-lobby  { background: var(--game-pink-bg); }
+    body.phase-theme-a      { background: var(--game-blue-bg); }
+    body.phase-theme-b      { background: var(--game-orange-bg); }
+    body.phase-theme-c      { background: var(--game-pink-bg); }
+    body.phase-theme-d      { background: var(--game-green-bg); }
+    body.phase-theme-final  { background: var(--game-yellow-bg); }
+    body.phase-theme-reveal { background: #231914; color: #FFF8EE; }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 4px dashed rgba(74, 50, 34, 0.16);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+      color: var(--game-brown-text);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-version {
+      background: var(--game-pink-bg);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 2px 9px;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+
+    .nav-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .nav-pill {
+      border: 2.5px solid rgba(74, 50, 34, 0.14);
+      background: #fff;
+      color: var(--game-brown-text);
+      border-radius: 9999px;
+      padding: 7px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12); }
+    .nav-pill-host { background: var(--game-brown-text); color: #fff; border-color: var(--game-brown-text); }
+    .nav-pill-dev  { background: var(--game-yellow-bg); color: var(--game-brown-text); border: 3px solid #fff; box-shadow: 0 3px 10px rgba(74, 50, 34, 0.25); }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 20px 16px 80px; }
+    .dashed-divider { border: none; border-top: 6px dashed rgba(255, 255, 255, 0.85); margin: 24px 0; }
+    .section-badge-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--game-pink-btn);
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 9999px;
+      padding: 8px 24px;
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 900;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card {
+      background: #fff;
+      color: var(--game-brown-text);
+      border-radius: var(--radius-card);
+      padding: clamp(18px, 3vw, 28px);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 20px;
+    }
+
+    .card-highlight { outline: 3px solid #fff; outline-offset: 4px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 3px solid #fff;
+      border-radius: 9999px;
+      padding: 12px 26px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.15s;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
+    }
+
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .btn-pink   { background: var(--game-pink-btn); color: #fff; }
+    .btn-blue   { background: var(--game-blue-tag); color: #fff; }
+    .btn-green  { background: var(--game-green-bg); color: #fff; }
+    .btn-yellow { background: var(--game-yellow-bg); color: var(--game-brown-text); }
+    .btn-brown  { background: var(--game-brown-text); color: #fff; }
+    .btn-orange { background: var(--game-orange-bg); color: #fff; }
+    .btn-ghost  { background: #f5f0ec; color: var(--game-brown-text); border-color: #e2d6cc; box-shadow: none; }
+    .btn-sm     { padding: 7px 15px; font-size: 0.88rem; border-width: 2px; }
+    .btn-lg     { padding: 15px 34px; font-size: 1.2rem; }
+
+    .boxes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    @media (max-width: 820px) { .boxes-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .box-card {
+      border-radius: 24px;
+      padding: 20px 16px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      transition: transform 0.2s ease;
+    }
+
+    .box-card.sol   { background: var(--box-sol); }
+    .box-card.luna  { background: var(--box-luna); }
+    .box-card.terra { background: var(--box-terra); }
+    .box-card.astra { background: var(--box-astra); }
+    .box-card.winner-1 { transform: scale(1.04); box-shadow: 0 0 0 5px var(--game-yellow-bg), 0 14px 28px rgba(0,0,0,0.24); }
+    .box-card.winner-2 { transform: scale(1.02); box-shadow: 0 0 0 4px #fff, 0 12px 24px rgba(0,0,0,0.2); }
+
+    .box-emoji { font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: 1.1; margin-bottom: 6px; }
+    .box-name  { font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 900; }
+
+    .aura-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.24);
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 9999px;
+      padding: 4px 14px;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+
+    .rank-ribbon {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--game-yellow-bg);
+      color: var(--game-brown-text);
+      border: 3px solid #fff;
+      border-radius: 9999px;
+      padding: 3px 14px;
+      font-weight: 900;
+      font-size: 0.88rem;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    }
+
+    .timer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 22px;
+      padding: 14px 22px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .timer-digits { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; font-variant-numeric: tabular-nums; color: var(--game-pink-btn); line-height: 1; }
+    .timer-digits.urgent { color: #D92626; animation: pulse 0.7s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    .big-callout {
+      text-align: center;
+      padding: clamp(22px, 4vw, 36px);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 4px dashed var(--game-orange-bg);
+      margin-bottom: 20px;
+    }
+
+    .big-callout h2 { font-size: clamp(1.5rem, 3.8vw, 2.5rem); font-weight: 900; color: var(--game-brown-text); margin-bottom: 8px; }
+
+    .team-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .team-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--game-blue-tag);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 1rem;
+      border: 2.5px solid #fff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    .team-pill.locked  { background: var(--game-green-bg); }
+    .team-pill.waiting { background: var(--game-taupe-bg); }
+
+    .privacy-shield {
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      border: 4px dashed var(--game-blue-tag);
+      background: #EEF7FD;
+    }
+    .privacy-shield.hidden-mode { background: var(--game-brown-text); color: #fff; border-color: var(--game-yellow-bg); }
+
+    .vote-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      color: #fff;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .vote-row.sol   { background: var(--box-sol); }
+    .vote-row.luna  { background: var(--box-luna); }
+    .vote-row.terra { background: var(--box-terra); }
+    .vote-row.astra { background: var(--box-astra); }
+
+    .vote-stepper { display: flex; align-items: center; gap: 12px; }
+    .vote-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff;
+      background: rgba(0, 0, 0, 0.25); color: #fff; font-size: 1.5rem; font-weight: 900;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .vote-count { font-size: 1.7rem; font-weight: 900; min-width: 28px; text-align: center; }
+
+    .score-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .score-table th { text-align: left; padding: 8px 12px; font-size: 0.88rem; color: #7A5C48; font-weight: 800; }
+    .score-table td { background: #FAF5F0; padding: 12px; font-weight: 700; font-size: 1rem; }
+    .score-table tr td:first-child { border-radius: 14px 0 0 14px; }
+    .score-table tr td:last-child  { border-radius: 0 14px 14px 0; }
+
+    .demo-bar {
+      background: #2D1F17; color: #FFE7A8; padding: 10px 16px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+      font-size: 0.86rem; font-weight: 700; border-bottom: 3px solid var(--game-yellow-bg);
+    }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(35, 25, 20, 0.72); backdrop-filter: blur(4px);
+      z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: #fff; color: var(--game-brown-text); border-radius: 28px;
+      max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto;
+      padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      position: relative; border: 4px solid var(--game-yellow-bg);
+    }
+
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; width: 38px; height: 38px;
+      border-radius: 50%; border: none; background: #F3ECE6;
+      color: var(--game-brown-text); font-size: 1.2rem; font-weight: 900; cursor: pointer;
+    }
+
+    .wheel-stage { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+    .wheel-wrap  { position: relative; width: min(320px, 78vw); height: min(320px, 78vw); }
+    .wheel-pointer { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 2.2rem; z-index: 10; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)); }
+    .wheel-svg { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 0 8px #fff, 0 12px 30px rgba(0,0,0,0.3); will-change: transform; }
+
+    .reveal-paper-card {
+      background: #FFFFFF; color: #333; border-radius: 20px; padding: 28px 18px; text-align: center;
+      min-height: 190px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 3px dashed #D6D6D6; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      animation: paperFlip 0.7s ease forwards;
+    }
+    @keyframes paperFlip { 0% { transform: rotateY(90deg) scale(0.85); opacity: 0; } 100% { transform: rotateY(0deg) scale(1); opacity: 1; } }
+
+    .input {
+      width: 100%; padding: 13px 16px; border-radius: 16px; border: 3px solid #E4D6CA;
+      font-family: inherit; font-size: 1.05rem; font-weight: 700; color: var(--game-brown-text); outline: none;
+    }
+    .input:focus { border-color: var(--game-pink-btn); }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px);
+      background: var(--game-brown-text); color: #fff; padding: 12px 24px; border-radius: 9999px;
+      font-weight: 800; z-index: 999; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border: 3px solid var(--game-yellow-bg); transition: transform 0.25s ease; max-width: 92vw; text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: end; margin: 24px 0; }
+    @media (max-width: 640px) { .podium-grid { grid-template-columns: 1fr; } }
+    .podium-col { background: #fff; border-radius: 24px; padding: 20px 14px; text-align: center; box-shadow: var(--shadow-card); border: 4px solid #fff; }
+    .podium-col.p1 { background: #FFFDF2; border-color: var(--game-pink-btn); transform: translateY(-10px); }
+    .small-muted { font-size: 0.88rem; color: #7C6354; font-weight: 600; }
+    .reveal-subtle-btn { position: fixed; bottom: 16px; right: 16px; z-index: 90; opacity: 0.88; }
+  </style>
+</head>
+<body class="phase-theme-lobby">
+
+  <nav class="navbar">
+    <div class="nav-brand" onclick="showToast('黑盒造神：Sol / Luna / Terra / Astra（v2.1.2）')">
+      <span>📦 黑盒造神：Sol / Luna / Terra / Astra</span>
+      <span class="nav-version">v2.1.2</span>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-pill" onclick="openQrModal()">📱 QR Code</button>
+      <button class="nav-pill" onclick="openModal('rules-modal')">📖 規則</button>
+      <button class="nav-pill" onclick="openSettingsModal()">⚙️ 設定</button>
+      <button class="nav-pill nav-pill-host" onclick="openHostModal()">🛠️ 主持後台</button>
+      
+      <button class="nav-pill" onclick="handleRestartClick()">🔄 重開</button>
+    </div>
+  </nav>
+
+  <div id="demo-bar" class="demo-bar" style="display: none;"></div>
+
+  <main id="app" class="container">
+    <div class="card" style="text-align:center; padding:48px 20px;">
+      <h2>📦 正在載入黑盒造神⋯⋯</h2>
+    </div>
+  </main>
+
+  <div id="toast" class="toast show">📦 正在打包乾淨正式版部署包⋯⋯</div>
+
+  <!-- QR Code Modal -->
+  <div id="qr-modal" class="modal-backdrop" onclick="if(event.target===this) closeModal('qr-modal')">
+    <div class="modal-box" style="text-align:center;">
+      <button class="modal-close" onclick="closeModal('qr-modal')">✕</button>
+      <h2 style="margin-bottom:8px;">📱 掃碼入房</h2>
+      <p class="small-muted" style="margin-bottom:16px;">各組派 1 部手機掃描 QR Code 即可入房睇股同投票</p>
+      <div id="qr-box" style="display:inline-block; padding:16px; background:#fff; border:4px dashed var(--game-pink-bg); border-radius:20px; margin-bottom:14px;" title="file:///Users/mingtakyau/Desktop/gemini-code-1795242309791.html"><canvas width="220" height="220" style="display: none;"></canvas><img src="data:image/png;base64,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" style="display: block;"></div>
+      <div id="qr-room-pill" style="margin-bottom:12px;"><span class="section-badge" style="font-size:1rem; padding:6px 18px;">房號：DEMO</span></div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-blue btn-sm" onclick="copyJoinUrl()">📋 複製入房連結</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('qr-modal')">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div id="rules-modal" class="modal-backdrop" onclick="if(event.target===this) closeModal('rules-modal')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('rules-modal')">✕</button>
+      <h2 style="margin-bottom:14px;">📖 遊戲規則（3 回合心理博弈）</h2>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:0.98rem;">
+        <div style="background:#FAF5F0; padding:14px; border-radius:16px;">
+          <strong>1. 每回合秘密派股（清倉重派）</strong><br>
+          每組每回合由平衡牌池獲派 4 股：<strong>1 個主力盒（2 股）、2 個副線盒（各 1 股）、1 個空倉盒（0 股）</strong>。全場 4 個黑盒總股數精確相等！上回合持股每局完結後清空。
+        </div>
+        <div style="background:#FAF5F0; padding:14px; border-radius:16px;">
+          <strong>2. 社交拉票</strong><br>
+          • <strong>第 1 回合（靜音回合）</strong>：禁止跨組溝通，只限組內商量。<br>
+          • <strong>第 2、3 回合（自由吹風）</strong>：隨便走動拉票、結盟、放風！
+        </div>
+        <div style="background:#FAF5F0; padding:14px; border-radius:16px;">
+          <strong>3. 秘密投票（嚴禁 3-0 全押）</strong><br>
+          每組每回合必須投出剛好 <strong>3 票</strong>，單一黑盒上限 <strong>2 票</strong>（只准 <code>2-1</code> 或 <code>1-1-1</code>）。投票不會增加持股。投票期間主螢幕隱藏即時總分榜。
+        </div>
+        <div style="background:#FAF5F0; padding:14px; border-radius:16px;">
+          <strong>4. 開票、永久光環與計分</strong><br>
+          • 票數最高兩個黑盒成為唯一<strong>第 1 名（底分 3）</strong>及<strong>第 2 名（底分 2）</strong>；第 3、4 名 0 分。<br>
+          • <strong>打和決勝</strong>：先比<strong>賽前永久光環</strong>高者勝；若光環亦相同，即場啟動<strong>公開命運轉盤</strong>抽籤！<br>
+          • <strong>本回合得分</strong> ＝ ∑[(底分 ＋ 賽前光環) × 本回合持股數]<br>
+          • 賽後第 1、2 名黑盒各獲得 <strong>永久光環 +1</strong>（累積至後續回合）。
+        </div>
+        <div style="background:#FAF5F0; padding:14px; border-radius:16px;">
+          <strong>5. 最終勝負</strong><br>
+          3 回合總分最高者勝；同分比第 3 回合得分；再同分則並列冠軍！
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-backdrop" onclick="if(event.target===this) closeModal('settings-modal')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+      <h2 style="margin-bottom:14px;">⚙️ 系統與計時設定</h2>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div>
+          <label style="font-weight:800; display:block; margin-bottom:6px;">🔊 音效開關（Web Audio 合成音效）</label>
+          <button id="mute-toggle-btn" class="btn btn-blue btn-sm" onclick="toggleMute()">🔊 音效已開啟</button>
+        </div>
+        <div>
+          <label style="font-weight:800; display:block; margin-bottom:6px;">🌐 Cloudflare Worker 後端網址（Mode C 線上同步）</label>
+          <input id="worker-url-input" class="input" type="url" placeholder="https://blackbox-idol.ymtwill.workers.dev">
+        </div>
+        <div>
+          <label style="font-weight:800; display:block; margin-bottom:8px;">⏱️ 各階段預設秒數（主持可修改）</label>
+          <div class="grid-2">
+            <div><span class="small-muted">階段 A 秘密派股（秒）</span><input id="t-phaseA" class="input" type="number" min="5" max="180" value="15"></div>
+            <div><span class="small-muted">階段 B 第 1 回合靜音（秒）</span><input id="t-phaseB1" class="input" type="number" min="10" max="300" value="45"></div>
+            <div><span class="small-muted">階段 B 第 2-3 回合吹風（秒）</span><input id="t-phaseB23" class="input" type="number" min="10" max="300" value="60"></div>
+            <div><span class="small-muted">階段 C 秘密投票（秒）</span><input id="t-phaseC" class="input" type="number" min="10" max="300" value="30"></div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('settings-modal')">取消</button>
+          <button class="btn btn-pink btn-sm" onclick="saveSettings()">💾 儲存設定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Host Control Modal -->
+  <div id="host-modal" class="modal-backdrop" onclick="if(event.target===this) closeModal('host-modal')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('host-modal')">✕</button>
+      <h2 style="margin-bottom:12px;">🛠️ 主持後台（God Mode）</h2>
+      <div id="host-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Spinning Wheel Modal -->
+  <div id="wheel-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width:520px; text-align:center;">
+      <div id="wheel-modal-body">
+      <div class="wheel-stage">
+        <div class="section-badge" style="background:var(--game-orange-bg);">🎡 公開命運轉盤（第 1 名決勝）</div>
+        <p style="font-weight:800; color:var(--game-brown-text);">票數（4 票）及賽前光環（+1）並列，公開轉盤抽籤決出第 1 名</p>
+        <div class="wheel-wrap"><div class="wheel-pointer">🔻</div><svg id="wheel-svg" class="wheel-svg" viewBox="0 0 300 300" style="transform: rotate(2448.91deg);"><path d="M 150 150 L 150.00 4.00 A 146 146 0 0 1 150.00 296.00 Z" fill="#3A7CA5" stroke="#FFFFFF" stroke-width="4"></path>
+        <g transform="translate(240.5, 150.0)">
+          <text text-anchor="middle" y="-6" font-size="30">🌙</text>
+          <text text-anchor="middle" y="20" fill="#FFFFFF" font-weight="900" font-size="18" font-family="Noto Sans TC, sans-serif">Luna</text>
+        </g><path d="M 150 150 L 150.00 296.00 A 146 146 0 0 1 150.00 4.00 Z" fill="#4E9A51" stroke="#FFFFFF" stroke-width="4"></path>
+        <g transform="translate(59.5, 150.0)">
+          <text text-anchor="middle" y="-6" font-size="30">🌿</text>
+          <text text-anchor="middle" y="20" fill="#FFFFFF" font-weight="900" font-size="18" font-family="Noto Sans TC, sans-serif">Terra</text>
+        </g><circle cx="150" cy="150" r="22" fill="#4A3222" stroke="#fff" stroke-width="4"></circle><text x="150" y="157" text-anchor="middle" fill="#F3C242" font-size="16" font-weight="900">✦</text></svg></div>
+        <div id="wheel-result-banner" style="min-height:48px; font-size:1.3rem; font-weight:900; color:var(--game-pink-btn);">
+          <div style="background:#3A7CA5; color:#fff; padding:10px 22px; border-radius:9999px; display:inline-block; border:3px solid #fff;">
+            🎉 抽中第 1 名：🌙 Luna！
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn btn-pink btn-sm" onclick="window._continueWheel()">
+              📊 揭曉本回合得分結算
+            </button>
+          </div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Reveal Double-Confirmation Modal -->
+  <div id="reveal-confirm-modal" class="modal-backdrop" onclick="if(event.target===this) closeModal('reveal-confirm-modal')">
+    <div class="modal-box" style="text-align:center; max-width:480px;">
+      <button class="modal-close" onclick="closeModal('reveal-confirm-modal')">✕</button>
+      <div style="font-size:3rem; margin-bottom:8px;">🎁</div>
+      <h2 style="margin-bottom:10px;">防劇透二次確認</h2>
+      <p style="margin-bottom:18px; font-weight:700;">
+        進入「拆封揭曉模式」後，主螢幕會向全場揭曉 4 個黑盒嘅真相（純白白紙）並顯示反思過渡問題。<br><br>
+        請確認現場已經準備好拆開實體黑盒！
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="closeModal('reveal-confirm-modal')">未係時候，返回</button>
+        <button class="btn btn-pink" onclick="confirmEnterReveal()">✅ 確定拆封揭曉</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const DEFAULT_WORKER_URL = 'https://blackbox-idol.ymtwill.workers.dev';
+  const BOXES = ['Sol', 'Luna', 'Terra', 'Astra'];
+  const BOX_META = {
+    Sol:   { name: 'Sol',   emoji: '☀️', color: '#E69F26', cls: 'sol' },
+    Luna:  { name: 'Luna',  emoji: '🌙', color: '#3A7CA5', cls: 'luna' },
+    Terra: { name: 'Terra', emoji: '🌿', color: '#4E9A51', cls: 'terra' },
+    Astra: { name: 'Astra', emoji: '✦',  color: '#7C4DBA', cls: 'astra' }
+  };
+  const DEFAULT_TIMERS = { phaseA: 15, phaseB_R1: 45, phaseB_R23: 60, phaseC: 30 };
+  const STORAGE_KEYS = {
+    session: 'blackbox_idol_session_v212',
+    demo: 'blackbox_idol_demo_v212',
+    settings: 'blackbox_idol_settings_v212'
+  };
+
+  function generateBaseDeck() {
+    const deck = [];
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        if (i === j) continue;
+        const card = [1, 1, 1, 1];
+        card[i] = 2; card[j] = 0;
+        deck.push(card);
+      }
+    }
+    return deck;
+  }
+  const BASE_DECK = generateBaseDeck();
+  const POOL_CACHE = new Map();
+
+  function buildBalancedPool(N) {
+    if (POOL_CACHE.has(N)) return POOL_CACHE.get(N);
+    const validCombos = [], chosen = [], sums = [0, 0, 0, 0], twoCounts = [0, 0, 0, 0];
+    function backtrack(startIdx, depth) {
+      if (depth === N) {
+        if (sums[0] !== N || sums[1] !== N || sums[2] !== N || sums[3] !== N) return;
+        if (Math.max(...twoCounts) - Math.min(...twoCounts) > 1) return;
+        validCombos.push(chosen.map(c => [...c]));
+        return;
+      }
+      const need = N - depth;
+      for (let idx = startIdx; idx <= BASE_DECK.length - need; idx++) {
+        const card = BASE_DECK[idx];
+        if (sums[0]+card[0]>N || sums[1]+card[1]>N || sums[2]+card[2]>N || sums[3]+card[3]>N) continue;
+        chosen.push(card);
+        for (let b = 0; b < 4; b++) { sums[b] += card[b]; if (card[b] === 2) twoCounts[b]++; }
+        backtrack(idx + 1, depth + 1);
+        chosen.pop();
+        for (let b = 0; b < 4; b++) { sums[b] -= card[b]; if (card[b] === 2) twoCounts[b]--; }
+      }
+    }
+    backtrack(0, 0);
+    POOL_CACHE.set(N, validCombos);
+    return validCombos;
+  }
+
+  function randInt(max) {
+    const arr = new Uint32Array(1);
+    const limit = Math.floor(0x100000000 / max) * max;
+    let val;
+    do { crypto.getRandomValues(arr); val = arr[0]; } while (val >= limit);
+    return val % max;
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = randInt(i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function dealRoundHoldings(teamIds) {
+    const pool = buildBalancedPool(teamIds.length);
+    const combo = shuffle(pool[randInt(pool.length)]);
+    const holdingsByTeam = {};
+    teamIds.forEach((id, idx) => {
+      const c = combo[idx];
+      holdingsByTeam[id] = { Sol: c[0], Luna: c[1], Terra: c[2], Astra: c[3] };
+    });
+    return holdingsByTeam;
+  }
+
+  function validateVotes(votes) {
+    let total = 0;
+    for (const b of BOXES) {
+      const v = votes[b];
+      if (!Number.isInteger(v) || v < 0) return { valid: false, error: '票數必須為非負整數' };
+      if (v > 2) return { valid: false, error: '嚴禁 3-0 全押！單一黑盒上限 2 票' };
+      total += v;
+    }
+    if (total !== 3) return { valid: false, error: '必須投出剛好 3 票' };
+    return { valid: true };
+  }
+
+  function generateRandomValidVote() {
+    const order = shuffle(BOXES);
+    const v = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+    v[order[0]] = 2; v[order[1]] = 1;
+    return v;
+  }
+
+  function resolveRound({ votesByTeam, holdingsByTeam, preAuras, teamList }) {
+    const voteTotals = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+    for (const t of teamList) {
+      const v = votesByTeam[t.id];
+      if (!v) continue;
+      for (const b of BOXES) voteTotals[b] += (v[b] || 0);
+    }
+    const wheelEvents = [];
+    function pickWinner(candidates, targetRank) {
+      const maxVote = Math.max(...candidates.map(b => voteTotals[b]));
+      const topVote = candidates.filter(b => voteTotals[b] === maxVote);
+      if (topVote.length === 1) return { winner: topVote[0], method: 'votes' };
+      const maxAura = Math.max(...topVote.map(b => preAuras[b]));
+      const topAura = topVote.filter(b => preAuras[b] === maxAura);
+      if (topAura.length === 1) return { winner: topAura[0], method: 'aura' };
+      const winner = topAura[randInt(topAura.length)];
+      wheelEvents.push({
+        targetRank, candidates: [...topAura], winner, votes: maxVote, preAura: maxAura,
+        reason: `票數（${maxVote} 票）及賽前光環（+${maxAura}）並列，公開轉盤抽籤決出第 ${targetRank} 名`
+      });
+      return { winner, method: 'wheel' };
+    }
+    const firstRes = pickWinner([...BOXES], 1);
+    const rem = BOXES.filter(b => b !== firstRes.winner);
+    const secondRes = pickWinner(rem, 2);
+    const others = rem.filter(b => b !== secondRes.winner).sort((a, b) =>
+      voteTotals[b] !== voteTotals[a] ? voteTotals[b] - voteTotals[a] : preAuras[b] - preAuras[a]
+    );
+    const first = firstRes.winner, second = secondRes.winner;
+    const baseScores = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+    baseScores[first] = 3; baseScores[second] = 2;
+    const unitValues = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+    unitValues[first] = 3 + preAuras[first]; unitValues[second] = 2 + preAuras[second];
+    const postAuras = { ...preAuras };
+    postAuras[first] += 1; postAuras[second] += 1;
+    const teamBreakdowns = {};
+    for (const t of teamList) {
+      const h = holdingsByTeam[t.id] || { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+      const firstPts = h[first] * unitValues[first], secondPts = h[second] * unitValues[second];
+      teamBreakdowns[t.id] = {
+        teamId: t.id, teamName: t.name, holdings: { ...h }, votes: votesByTeam[t.id] ? { ...votesByTeam[t.id] } : null,
+        firstBox: first, firstShares: h[first], firstPts, secondBox: second, secondShares: h[second], secondPts,
+        roundScore: firstPts + secondPts
+      };
+    }
+    return {
+      voteTotals, preAuras: { ...preAuras }, postAuras, first, second,
+      firstMethod: firstRes.method, secondMethod: secondRes.method,
+      ranking: [first, second, ...others], baseScores, unitValues, wheelEvents, teamBreakdowns
+    };
+  }
+
+  function computeFinalRankings(teams) {
+    const sorted = [...teams].sort((a, b) => {
+      if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+      const r3a = a.roundScores?.[2] || 0, r3b = b.roundScores?.[2] || 0;
+      if (r3b !== r3a) return r3b - r3a;
+      return a.name.localeCompare(b.name, 'zh-Hant');
+    });
+    let currentRank = 1;
+    return sorted.map((t, idx) => {
+      if (idx > 0) {
+        const p = sorted[idx - 1];
+        if (t.totalScore !== p.totalScore || (t.roundScores?.[2] || 0) !== (p.roundScores?.[2] || 0)) currentRank = idx + 1;
+      }
+      return { ...t, rank: currentRank, round3Score: t.roundScores?.[2] || 0 };
+    });
+  }
+
+  const SFX = (() => {
+    let ctx = null;
+    function getCtx() {
+      if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    }
+    function tone(freq, dur, type = 'sine', gainVal = 0.14, delay = 0) {
+      if (appSettings.muted) return;
+      const c = getCtx(); if (!c) return;
+      const osc = c.createOscillator(), g = c.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(freq, c.currentTime + delay);
+      g.gain.setValueAtTime(0.0001, c.currentTime + delay);
+      g.gain.exponentialRampToValueAtTime(gainVal, c.currentTime + delay + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + delay + dur);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(c.currentTime + delay); osc.stop(c.currentTime + delay + dur + 0.02);
+    }
+    return {
+      click: () => tone(520, 0.06, 'triangle', 0.1),
+      tick: (urgent = false) => tone(urgent ? 980 : 660, 0.07, 'square', urgent ? 0.11 : 0.05),
+      lock: () => { tone(523.25, 0.1, 'triangle', 0.14, 0); tone(783.99, 0.18, 'triangle', 0.16, 0.09); },
+      nudge: () => { tone(880, 0.12, 'sawtooth', 0.12, 0); tone(880, 0.12, 'sawtooth', 0.12, 0.16); },
+      wheelTick: () => tone(740 + Math.random() * 140, 0.045, 'triangle', 0.12),
+      fanfare: () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.25, 'triangle', 0.15, i * 0.1)),
+      reveal: () => [220, 277.18, 329.63, 440].forEach((f, i) => tone(f, 0.55, 'sine', 0.14, i * 0.18))
+    };
+  })();
+
+  let appSettings = { workerUrl: DEFAULT_WORKER_URL, muted: false };
+  try { appSettings = { ...appSettings, ...JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || '{}') }; } catch (_) {}
+
+  let session = { mode: 'landing', role: null, roomCode: '', hostToken: '', teamId: '', teamName: '', token: '' };
+  let gameState = null, ws = null, wsReconnectTimer = null, demoRoom = null, demoView = 'host';
+  let privacyHidden = true, draftVotes = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 }, lastDraftRound = 0;
+  let wheelPlaying = false, activeWheelRoundKey = '', lastBeepSec = -1;
+
+  function saveSession() { try { localStorage.setItem(STORAGE_KEYS.session, JSON.stringify(session)); } catch (_) {} }
+  function showToast(msg, dur = 3200) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), dur);
+  }
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function getWsBaseUrl() { return (appSettings.workerUrl || DEFAULT_WORKER_URL).replace(/\/$/, '').replace(/^http/, 'ws'); }
+
+  async function createLiveRoom() {
+    SFX.click();
+    const base = (appSettings.workerUrl || DEFAULT_WORKER_URL).replace(/\/$/, '');
+    showToast('正在建立線上同步房間⋯⋯');
+    try {
+      const resp = await fetch(`${base}/api/create-room`, { method: 'POST' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      session = { mode: 'live', role: 'host', roomCode: data.roomCode, hostToken: data.hostToken, teamId: '', teamName: '', token: '' };
+      saveSession(); connectLiveWs();
+      showToast(`✅ 房間 ${data.roomCode} 已開好！快按 📱 QR Code 俾各組掃碼`);
+    } catch (err) {
+      showToast(`⚠️ 無法連接 Worker (${err.message})，請於「⚙️ 設定」檢查網址，或先用單機 Demo 模式試玩！`, 5000);
+    }
+  }
+
+  function joinLiveRoomFromForm() {
+    SFX.click();
+    const code = (document.getElementById('join-room-code')?.value || '').trim().toUpperCase();
+    const name = (document.getElementById('join-team-name')?.value || '').trim();
+    if (!code || code.length < 3) { showToast('請輸入有效房號'); return; }
+    if (!name) { showToast('請輸入你哋組嘅隊名'); return; }
+    session = { mode: 'live', role: 'player', roomCode: code, hostToken: '', teamId: '', teamName: name, token: session.roomCode === code ? session.token : '' };
+    saveSession(); connectLiveWs();
+  }
+
+  function connectLiveWs() {
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    clearTimeout(wsReconnectTimer);
+    const params = new URLSearchParams({ room: session.roomCode, role: session.role || 'viewer' });
+    if (session.role === 'host' && session.hostToken) params.set('hostToken', session.hostToken);
+    ws = new WebSocket(`${getWsBaseUrl()}/ws?${params.toString()}`);
+    ws.onopen = () => {
+      if (session.role === 'player') ws.send(JSON.stringify({ type: 'join_team', teamName: session.teamName, token: session.token || null }));
+    };
+    ws.onmessage = (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === 'error') showToast('⚠️ ' + msg.error, 4000);
+      else if (msg.type === 'joined') { session.teamId = msg.teamId; session.teamName = msg.teamName; session.token = msg.token; saveSession(); showToast(`✅ 已成功加入「${msg.teamName}」！`); }
+      else if (msg.type === 'nudge') { SFX.nudge(); showToast(msg.message, 5000); }
+      else if (msg.type === 'kicked') { showToast('你哋組已被主持人移出房間'); leaveToLanding(); }
+      else if (msg.type === 'state') { gameState = msg.state; onStateUpdated(); }
+    };
+    ws.onclose = () => { if (session.mode === 'live') wsReconnectTimer = setTimeout(connectLiveWs, 2200); };
+  }
+
+  function sendWs(payload) {
+    if (session.mode === 'demo') { handleDemoAction(payload); return; }
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload));
+    else showToast('連線重連中，請稍候再試⋯⋯');
+  }
+
+  const DEMO_TEAM_NAMES = ['🔥 烈火組', '🪨 磐石組', '💧 活水組', '⭐ 晨星組', '🌿 橄欖組', '🕊️ 平安組', '🛡️ 信心組', '🎺 號角組'];
+
+  function startDemoMode(teamCount = 5) {
+    SFX.click();
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    const N = Math.max(3, Math.min(8, Number(teamCount) || 5));
+    demoRoom = {
+      roomCode: 'DEMO', status: 'LOBBY', round: 0,
+      auras: { Sol: 0, Luna: 0, Terra: 0, Astra: 0 }, timers: { ...DEFAULT_TIMERS },
+      timerEndsAt: null, timerPaused: false, timerRemainingMs: 0,
+      teams: Array.from({ length: N }, (_, i) => ({ id: 'demo_' + (i + 1), name: DEMO_TEAM_NAMES[i], totalScore: 0, manualDelta: 0, roundScores: [0, 0, 0] })),
+      holdings: {}, votes: {}, lastResolution: null, history: [], wheelComplete: false
+    };
+    session = { mode: 'demo', role: 'host', roomCode: 'DEMO', hostToken: 'demo', teamId: '', teamName: '', token: '' };
+    demoView = 'host';
+    saveSession(); saveDemoRoom(); syncDemoSnapshot(); closeModal('host-modal');
+    showToast(`🧪 已開啟單機模擬測試模式（${N} 組），可切換主螢幕／各組手機視角！`, 4000);
+  }
+
+  function saveDemoRoom() { try { localStorage.setItem(STORAGE_KEYS.demo, JSON.stringify(demoRoom)); } catch (_) {} }
+
+  function syncDemoSnapshot() {
+    if (!demoRoom) return;
+    const r = demoRoom, hideScores = r.status === 'ROUND_C';
+    const snap = {
+      roomCode: r.roomCode, status: r.status, round: r.round, auras: { ...r.auras }, timers: { ...r.timers },
+      timerEndsAt: r.timerEndsAt, timerPaused: r.timerPaused, timerRemainingMs: r.timerRemainingMs, serverNow: Date.now(),
+      teams: r.teams.map(t => ({ id: t.id, name: t.name, connected: true, hasVoted: Boolean(r.votes[t.id]), totalScore: hideScores ? null : t.totalScore, manualDelta: hideScores ? null : t.manualDelta, roundScores: hideScores ? null : t.roundScores })),
+      hostTeams: r.teams.map(t => ({ id: t.id, name: t.name, connected: true, hasVoted: Boolean(r.votes[t.id]), totalScore: t.totalScore, manualDelta: t.manualDelta, roundScores: t.roundScores })),
+      votedCount: Object.keys(r.votes).length, totalTeams: r.teams.length,
+      lastResolution: (r.status === 'ROUND_D' || r.status === 'FINAL' || r.status === 'REVEAL') ? r.lastResolution : null,
+      history: (r.status === 'FINAL' || r.status === 'REVEAL') ? r.history : [],
+      finalRankings: (r.status === 'FINAL' || r.status === 'REVEAL') ? computeFinalRankings(r.teams) : null,
+      wheelComplete: r.wheelComplete
+    };
+    if (demoView !== 'host') {
+      const t = r.teams.find(x => x.id === demoView);
+      snap.myTeam = t ? { id: t.id, name: t.name, totalScore: t.totalScore, roundScores: t.roundScores, holdings: r.holdings[t.id] || null, myVotes: r.votes[t.id] || null } : null;
+    }
+    gameState = snap;
+    onStateUpdated();
+  }
+
+  function demoStartTimer(sec) { demoRoom.timerPaused = false; demoRoom.timerRemainingMs = sec * 1000; demoRoom.timerEndsAt = Date.now() + sec * 1000; }
+  function demoBeginRound(num) {
+    demoRoom.round = num; demoRoom.status = 'ROUND_A'; demoRoom.votes = {}; demoRoom.lastResolution = null; demoRoom.wheelComplete = false;
+    demoRoom.holdings = dealRoundHoldings(demoRoom.teams.map(t => t.id));
+    demoStartTimer(demoRoom.timers.phaseA);
+  }
+  function demoFinalizeRound() {
+    const r = demoRoom;
+    const res = resolveRound({ votesByTeam: r.votes, holdingsByTeam: r.holdings, preAuras: r.auras, teamList: r.teams });
+    for (const t of r.teams) {
+      const pts = res.teamBreakdowns[t.id]?.roundScore || 0;
+      t.roundScores[r.round - 1] = pts;
+      t.totalScore = (t.roundScores[0] || 0) + (t.roundScores[1] || 0) + (t.roundScores[2] || 0) + (t.manualDelta || 0);
+    }
+    r.auras = { ...res.postAuras }; r.lastResolution = { round: r.round, ...res }; r.history.push(r.lastResolution);
+    r.status = 'ROUND_D'; r.wheelComplete = res.wheelEvents.length === 0; r.timerEndsAt = null; r.timerPaused = false; r.timerRemainingMs = 0;
+  }
+
+  function handleDemoAction(msg) {
+    if (!demoRoom) return;
+    const r = demoRoom;
+    switch (msg.type) {
+      case 'host_next':
+        if (r.status === 'LOBBY') { if (r.teams.length < 3 || r.teams.length > 8) { showToast('需要 3 至 8 組'); return; } demoBeginRound(1); }
+        else if (r.status === 'ROUND_A') { r.status = 'ROUND_B'; demoStartTimer(r.round === 1 ? r.timers.phaseB_R1 : r.timers.phaseB_R23); }
+        else if (r.status === 'ROUND_B') { r.status = 'ROUND_C'; demoStartTimer(r.timers.phaseC); }
+        else if (r.status === 'ROUND_C') {
+          if (r.teams.some(t => !r.votes[t.id])) { showToast('仍有組別未投票，可按「🤖 Bot 全部自動投」或「強制結算」'); return; }
+          demoFinalizeRound();
+        } else if (r.status === 'ROUND_D') {
+          if (r.round < 3) demoBeginRound(r.round + 1); else { r.status = 'FINAL'; r.timerEndsAt = null; }
+        }
+        break;
+      case 'host_pause_toggle':
+        if (r.timerPaused) { r.timerPaused = false; r.timerEndsAt = Date.now() + r.timerRemainingMs; }
+        else if (r.timerEndsAt) { r.timerPaused = true; r.timerRemainingMs = Math.max(0, r.timerEndsAt - Date.now()); r.timerEndsAt = null; }
+        break;
+      case 'host_extend_timer': {
+        const add = (Number(msg.seconds) || 15) * 1000;
+        if (r.timerPaused) r.timerRemainingMs += add; else if (r.timerEndsAt) r.timerEndsAt = Math.max(Date.now(), r.timerEndsAt) + add;
+        break;
+      }
+      case 'submit_vote': {
+        const check = validateVotes(msg.votes); if (!check.valid) { showToast('⚠️ ' + check.error); return; }
+        const tid = msg.teamId || demoView; if (r.votes[tid]) return;
+        r.votes[tid] = { ...msg.votes }; SFX.lock();
+        if (Object.keys(r.votes).length === r.teams.length) demoFinalizeRound();
+        break;
+      }
+      case 'demo_bot_vote_all':
+        if (r.status !== 'ROUND_C') return;
+        for (const t of r.teams) {
+          if (!r.votes[t.id]) {
+            const h = r.holdings[t.id];
+            const mainBox = BOXES.find(b => h[b] === 2) || BOXES[0];
+            const secBoxes = BOXES.filter(b => h[b] === 1);
+            const v = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+            v[mainBox] = 2; v[secBoxes[randInt(secBoxes.length)] || BOXES[1]] = 1;
+            r.votes[t.id] = v;
+          }
+        }
+        demoFinalizeRound();
+        break;
+      case 'demo_force_tie_wheel':
+        if (r.status !== 'ROUND_C') { showToast('請先進入階段 C（秘密投票）'); return; }
+        {
+          const minAura = Math.min(...BOXES.map(b => r.auras[b]));
+          const sameAuraBoxes = BOXES.filter(b => r.auras[b] === minAura);
+          const pair = sameAuraBoxes.length >= 2 ? sameAuraBoxes.slice(0, 2) : ['Sol', 'Luna'];
+          const other = BOXES.find(b => !pair.includes(b));
+          r.teams.forEach((t, idx) => {
+            const v = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+            if (idx % 2 === 0) { v[pair[0]] = 2; v[pair[1]] = 1; } else { v[pair[1]] = 2; v[pair[0]] = 1; }
+            if (r.teams.length % 2 === 1 && idx === r.teams.length - 1) { v[pair[0]] = 1; v[pair[1]] = 1; v[other] = 1; }
+            r.votes[t.id] = v;
+          });
+          demoFinalizeRound();
+        }
+        break;
+      case 'host_force_end_vote':
+        if (r.status !== 'ROUND_C') return;
+        if (msg.autoVote) for (const t of r.teams) if (!r.votes[t.id]) r.votes[t.id] = generateRandomValidVote();
+        demoFinalizeRound();
+        break;
+      case 'host_nudge_unvoted': SFX.nudge(); showToast('⏰ 已向所有未投票組別發出催票震動提示！'); break;
+      case 'host_adjust_score': {
+        const t = r.teams.find(x => x.id === msg.teamId);
+        if (t) { t.manualDelta = (t.manualDelta || 0) + (Number(msg.delta) || 0); t.totalScore = (t.roundScores[0]||0)+(t.roundScores[1]||0)+(t.roundScores[2]||0)+t.manualDelta; }
+        break;
+      }
+      case 'host_rename_team': {
+        const t = r.teams.find(x => x.id === msg.teamId);
+        if (t && msg.newName) t.name = msg.newName.trim().slice(0, 20);
+        break;
+      }
+      case 'host_kick_team':
+        if (r.status !== 'LOBBY') { showToast('開波後不可踢組'); return; }
+        r.teams = r.teams.filter(x => x.id !== msg.teamId);
+        if (demoView === msg.teamId) demoView = 'host';
+        break;
+      case 'host_add_demo_team':
+        if (r.status !== 'LOBBY' || r.teams.length >= 8) return;
+        r.teams.push({ id: 'demo_' + Date.now().toString(36), name: DEMO_TEAM_NAMES[r.teams.length] || `第 ${r.teams.length + 1} 組`, totalScore: 0, manualDelta: 0, roundScores: [0, 0, 0] });
+        break;
+      case 'host_update_timers': if (msg.timers) r.timers = { ...r.timers, ...msg.timers }; break;
+      case 'host_wheel_done': r.wheelComplete = true; break;
+      case 'host_jump_final': r.status = 'FINAL'; r.timerEndsAt = null; break;
+      case 'host_enter_reveal': r.status = 'REVEAL'; SFX.reveal(); break;
+      case 'host_reset': startDemoMode(r.teams.length); return;
+    }
+    saveDemoRoom(); syncDemoSnapshot();
+  }
+
+  function checkAndLaunchWheel() {
+    if (!gameState || gameState.status !== 'ROUND_D' || !gameState.lastResolution) return;
+    const events = gameState.lastResolution.wheelEvents || [];
+    if (events.length === 0 || gameState.wheelComplete) return;
+    const key = `${gameState.roomCode}_R${gameState.round}`;
+    if (wheelPlaying || activeWheelRoundKey === key) return;
+    activeWheelRoundKey = key; wheelPlaying = true;
+    runWheelSequence(events, 0);
+  }
+
+  function buildWheelSvg(candidates) {
+    const n = candidates.length, cx = 150, cy = 150, r = 146, step = (2 * Math.PI) / n;
+    let paths = '';
+    candidates.forEach((box, i) => {
+      const a0 = -Math.PI / 2 + i * step, a1 = a0 + step;
+      const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      const mid = (a0 + a1) / 2, tx = cx + r * 0.62 * Math.cos(mid), ty = cy + r * 0.62 * Math.sin(mid);
+      const meta = BOX_META[box];
+      paths += `<path d="M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${step > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${meta.color}" stroke="#FFFFFF" stroke-width="4" />
+        <g transform="translate(${tx.toFixed(1)}, ${ty.toFixed(1)})">
+          <text text-anchor="middle" y="-6" font-size="30">${meta.emoji}</text>
+          <text text-anchor="middle" y="20" fill="#FFFFFF" font-weight="900" font-size="18" font-family="Noto Sans TC, sans-serif">${meta.name}</text>
+        </g>`;
+    });
+    return `<svg id="wheel-svg" class="wheel-svg" viewBox="0 0 300 300">${paths}<circle cx="150" cy="150" r="22" fill="#4A3222" stroke="#fff" stroke-width="4"/><text x="150" y="157" text-anchor="middle" fill="#F3C242" font-size="16" font-weight="900">✦</text></svg>`;
+  }
+
+  function runWheelSequence(events, index) {
+    if (index >= events.length) {
+      wheelPlaying = false; closeModal('wheel-modal');
+      if (isHostView()) sendWs({ type: 'host_wheel_done' });
+      render(); return;
+    }
+    const ev = events[index];
+    document.getElementById('wheel-modal-body').innerHTML = `
+      <div class="wheel-stage">
+        <div class="section-badge" style="background:var(--game-orange-bg);">🎡 公開命運轉盤（第 ${ev.targetRank} 名決勝）</div>
+        <p style="font-weight:800; color:var(--game-brown-text);">${ev.reason}</p>
+        <div class="wheel-wrap"><div class="wheel-pointer">🔻</div>${buildWheelSvg(ev.candidates)}</div>
+        <div id="wheel-result-banner" style="min-height:48px; font-size:1.3rem; font-weight:900; color:var(--game-pink-btn);">轉盤高速轉動中⋯⋯</div>
+      </div>`;
+    openModal('wheel-modal');
+
+    const n = ev.candidates.length, winIdx = ev.candidates.indexOf(ev.winner), sliceDeg = 360 / n;
+    const targetDeg = 360 * 6 + (360 - (winIdx + 0.5) * sliceDeg) + (Math.random() - 0.5) * (sliceDeg * 0.45);
+    const svg = document.getElementById('wheel-svg'), duration = 4200, start = performance.now();
+    let lastSliceTick = -1;
+
+    function frame(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const deg = targetDeg * (1 - Math.pow(1 - t, 3.4));
+      svg.style.transform = `rotate(${deg.toFixed(2)}deg)`;
+      const curSlice = Math.floor(((deg % 360) + 360) % 360 / sliceDeg);
+      if (curSlice !== lastSliceTick) { lastSliceTick = curSlice; SFX.wheelTick(); }
+      if (t < 1) requestAnimationFrame(frame);
+      else {
+        SFX.fanfare();
+        const meta = BOX_META[ev.winner];
+        document.getElementById('wheel-result-banner').innerHTML = `
+          <div style="background:${meta.color}; color:#fff; padding:10px 22px; border-radius:9999px; display:inline-block; border:3px solid #fff;">
+            🎉 抽中第 ${ev.targetRank} 名：${meta.emoji} ${meta.name}！
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn btn-pink btn-sm" onclick="window._continueWheel()">
+              ${index + 1 < events.length ? '➡️ 繼續下一輪轉盤（決出第 2 名）' : '📊 揭曉本回合得分結算'}
+            </button>
+          </div>`;
+        window._continueWheel = () => runWheelSequence(events, index + 1);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function isHostView() { return session.mode === 'demo' ? demoView === 'host' : session.role === 'host'; }
+
+  function onStateUpdated() {
+    if (gameState && gameState.round !== lastDraftRound && gameState.status === 'ROUND_C') {
+      draftVotes = { Sol: 0, Luna: 0, Terra: 0, Astra: 0 }; lastDraftRound = gameState.round;
+    }
+    render(); checkAndLaunchWheel();
+    if (document.getElementById('host-modal').classList.contains('open')) renderHostModal();
+  }
+
+  function updateBodyTheme() {
+    const map = { LOBBY:'phase-theme-lobby', ROUND_A:'phase-theme-a', ROUND_B:'phase-theme-b', ROUND_C:'phase-theme-c', ROUND_D:'phase-theme-d', FINAL:'phase-theme-final', REVEAL:'phase-theme-reveal' };
+    document.body.className = gameState ? (map[gameState.status] || 'phase-theme-lobby') : 'phase-theme-lobby';
+  }
+
+  function renderDemoBar() {
+    const bar = document.getElementById('demo-bar');
+    if (session.mode !== 'demo' || !demoRoom) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    const teamBtns = demoRoom.teams.map(t => `<button class="btn btn-sm ${demoView === t.id ? 'btn-yellow' : 'btn-ghost'}" style="padding:4px 10px; font-size:0.78rem;" onclick="switchDemoView('${t.id}')">📱 ${escapeHtml(t.name)}${demoRoom.votes[t.id] ? '✅' : ''}</button>`).join('');
+    bar.innerHTML = `<span>🧪 單機模擬模式：</span>
+      <button class="btn btn-sm ${demoView === 'host' ? 'btn-pink' : 'btn-ghost'}" style="padding:4px 12px; font-size:0.8rem;" onclick="switchDemoView('host')">🖥️ 主螢幕</button>${teamBtns}
+      ${demoRoom.status === 'ROUND_C' ? `<button class="btn btn-sm btn-green" style="padding:4px 10px; font-size:0.78rem;" onclick="sendWs({type:'demo_bot_vote_all'})">🤖 Bot 全部自動投</button><button class="btn btn-sm btn-orange" style="padding:4px 10px; font-size:0.78rem;" onclick="sendWs({type:'demo_force_tie_wheel'})">🎡 測試並列轉盤</button>` : ''}`;
+  }
+
+  function switchDemoView(view) { SFX.click(); demoView = view; privacyHidden = false; syncDemoSnapshot(); }
+
+  function render() {
+    updateBodyTheme(); renderDemoBar();
+    const root = document.getElementById('app');
+    if (session.mode === 'landing' || !gameState) { renderLanding(root); return; }
+    if (gameState.status === 'REVEAL') { renderRevealScreen(root); return; }
+    if (!isHostView()) { renderPlayerPhone(root); return; }
+    if (gameState.status === 'LOBBY') renderHostLobby(root);
+    else if (gameState.status === 'ROUND_A') renderHostPhaseA(root);
+    else if (gameState.status === 'ROUND_B') renderHostPhaseB(root);
+    else if (gameState.status === 'ROUND_C') renderHostPhaseC(root);
+    else if (gameState.status === 'ROUND_D') renderHostPhaseD(root);
+    else if (gameState.status === 'FINAL') renderFinalPodium(root);
+  }
+
+  function renderLanding(root) {
+    const preRoom = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
+    root.innerHTML = `
+      <div class="section-badge-wrap"><div class="section-badge">✨ 多機同步心理博弈破冰遊戲</div></div>
+      <div class="card card-highlight" style="text-align:center;">
+        <h1 style="font-size:clamp(1.7rem, 4.5vw, 2.8rem); font-weight:900; margin-bottom:10px;">📦 黑盒造神：Sol / Luna / Terra / Astra</h1>
+        <p style="font-size:1.05rem; font-weight:700; color:#7A5C48; max-width:680px; margin:0 auto 20px;">
+          四個神秘黑盒、三回合秘密持股與拉票博弈。<br/>大家一齊推高心水黑盒嘅「永久光環」——究竟邊個黑盒最值得信靠？
+        </p>
+        <div class="boxes-grid">${BOXES.map(b => `<div class="box-card ${BOX_META[b].cls}" style="padding:14px 10px;"><div class="box-emoji">${BOX_META[b].emoji}</div><div class="box-name">${b}</div></div>`).join('')}</div>
+      </div>
+      <hr class="dashed-divider" />
+      <div class="grid-2">
+        <div class="card" style="border:4px solid var(--game-blue-bg);">
+          <h2 style="margin-bottom:10px;">📱 我係組員（手機入房）</h2>
+          <p class="small-muted" style="margin-bottom:14px;">每組派 1 部手機輸入房號同隊名；斷線重新整理會自動連返原組別。</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <input id="join-room-code" class="input" placeholder="輸入 4 位房號（例：K7M2）" maxlength="8" value="${escapeHtml(preRoom)}" style="text-transform:uppercase; letter-spacing:0.12em;" />
+            <input id="join-team-name" class="input" placeholder="輸入隊名（例：烈火組）" maxlength="20" />
+            <button class="btn btn-blue btn-lg" onclick="joinLiveRoomFromForm()">🚀 加入房間</button>
+          </div>
+        </div>
+        <div class="card" style="border:4px solid var(--game-pink-btn);">
+          <h2 style="margin-bottom:10px;">🖥️ 我係主持人（主螢幕投影）</h2>
+          <p class="small-muted" style="margin-bottom:14px;">開線上房間讓全場手機掃 QR Code 同步，或開單機 Demo 模式上台前試玩。</p>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn btn-pink btn-lg" onclick="createLiveRoom()">🏟️ 主持開房（線上同步）</button>
+            <button class="btn btn-yellow btn-lg" onclick="startDemoMode(5)">🧪 單機模擬測試模式（5 組 Demo）</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderTimerBar(phaseTitle, subtitle) {
+    const remSec = getRemainingSeconds();
+    const mm = String(Math.floor(remSec / 60)).padStart(2, '0'), ss = String(remSec % 60).padStart(2, '0');
+    return `
+      <div class="timer-bar">
+        <div>
+          <div style="font-size:0.86rem; font-weight:800; color:var(--game-pink-btn);">第 ${gameState.round} / 3 回合</div>
+          <div style="font-size:1.35rem; font-weight:900;">${phaseTitle}</div>
+          ${subtitle ? `<div class="small-muted">${subtitle}</div>` : ''}
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <div id="live-timer-digits" class="timer-digits ${remSec > 0 && remSec <= 10 && !gameState.timerPaused ? 'urgent' : ''}">${gameState.timerPaused ? '⏸️ ' : ''}${mm}:${ss}</div>
+          ${isHostView() ? `<div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="sendWs({type:'host_pause_toggle'})">${gameState.timerPaused ? '▶️ 繼續' : '⏸️ 暫停'}</button>
+            <button class="btn btn-blue btn-sm" onclick="sendWs({type:'host_extend_timer', seconds:15})">+15秒</button>
+            <button class="btn btn-pink btn-sm" onclick="sendWs({type:'host_next'})">⏭️ 下一階段</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function renderBoxesGrid(opts = {}) {
+    const { showVotes = false, showWinners = false, aurasOverride = null } = opts;
+    const auras = aurasOverride || gameState.auras, res = gameState.lastResolution;
+    return `<div class="boxes-grid">${BOXES.map(b => {
+      const m = BOX_META[b], is1 = showWinners && res && res.first === b, is2 = showWinners && res && res.second === b;
+      const ribbon = is1 ? '<div class="rank-ribbon">🥇 第 1 名（底分 3）</div>' : is2 ? '<div class="rank-ribbon" style="background:#E8F4FD;">🥈 第 2 名（底分 2）</div>' : '';
+      return `<div class="box-card ${m.cls} ${is1 ? 'winner-1' : ''} ${is2 ? 'winner-2' : ''}">${ribbon}
+        <div class="box-emoji">${m.emoji}</div><div class="box-name">${m.name}</div>
+        <div class="aura-pill">✨ 永久光環 +${auras[b]}</div>
+        ${showVotes && res ? `<div style="margin-top:12px; background:rgba(255,255,255,0.22); border-radius:14px; padding:8px;"><div style="font-size:1.7rem; font-weight:900;">${res.voteTotals[b]} 票</div>${(is1 || is2) ? `<div style="font-size:0.86rem; font-weight:800;">每股派 ${res.unitValues[b]} 分 ｜ 賽後光環 +${res.postAuras[b]}</div>` : '<div style="font-size:0.84rem; opacity:0.85;">本回合 0 分</div>'}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function renderHostLobby(root) {
+    const n = gameState.teams.length, canStart = n >= 3 && n <= 8;
+    root.innerHTML = `
+      <div class="section-badge-wrap"><div class="section-badge">🏟️ 開房大廳 — 房號：${escapeHtml(gameState.roomCode)}</div></div>
+      <div class="card card-highlight">
+        <div class="grid-2" style="align-items:center;">
+          <div style="text-align:center;">
+            <div class="small-muted" style="font-size:1rem;">各組手機掃 QR Code 或輸入房號加入</div>
+            <div style="font-size:clamp(2.6rem, 7vw, 4.4rem); font-weight:900; letter-spacing:0.16em; color:var(--game-pink-btn); margin:6px 0;">${escapeHtml(gameState.roomCode)}</div>
+            <div id="lobby-inline-qr" style="display:inline-block; padding:12px; background:#fff; border:4px dashed var(--game-pink-bg); border-radius:18px; margin:8px 0;"></div>
+          </div>
+          <div>
+            <h2 style="margin-bottom:8px;">👥 已入房組別（${n} / 8 組）</h2>
+            <div style="background:#FFF8E6; border:2.5px dashed var(--game-yellow-bg); border-radius:16px; padding:10px 14px; font-size:0.9rem; font-weight:700; margin-bottom:12px;">
+              💡 主持提示：建議分 <strong>4–6 組</strong>，各組人數差距最多 1 人；N=3 僅作細組後備。
+            </div>
+            <div class="team-pills">${n === 0 ? '<span class="small-muted">等待組別掃碼入房⋯⋯</span>' : gameState.teams.map(t => `<span class="team-pill">${t.connected ? '🟢' : '⚪'} ${escapeHtml(t.name)}</span>`).join('')}</div>
+            <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-pink btn-lg" ${canStart ? '' : 'disabled'} onclick="SFX.click(); sendWs({type:'host_next'})">🚀 正式開波（第 1 回合）</button>
+              ${session.mode === 'demo' && n < 8 ? `<button class="btn btn-blue btn-sm" onclick="sendWs({type:'host_add_demo_team'})">➕ 加一組 Bot</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    setTimeout(() => renderQrInto('lobby-inline-qr', 150), 20);
+  }
+
+  function renderHostPhaseA(root) {
+    root.innerHTML = `${renderTimerBar('階段 A：秘密派股', '各組請喺手機私密確認本回合 4 股持股（防偷睇！）')}
+      <div class="big-callout" style="border-color:var(--game-blue-tag);">
+        <h2>🤫 各組請睇手機：本回合持股已派發！</h2>
+        <p style="font-size:1.1rem; font-weight:700; color:#555;">每組持有 <strong>2 股主力 ＋ 1 股 ＋ 1 股 ＋ 0 股</strong>，全場 4 個黑盒總股數精確相等。</p>
+      </div>${renderBoxesGrid()}`;
+  }
+
+  function renderHostPhaseB(root) {
+    const isSilent = gameState.round === 1;
+    root.innerHTML = `${renderTimerBar(isSilent ? '階段 B：靜音商討（第 1 回合）' : '階段 B：自由吹風拉票', isSilent ? '只限組內細聲傾計，禁止跨組交流' : '隨便走動拉票、結盟、放風！')}
+      <div class="big-callout" style="border-color:${isSilent ? 'var(--game-brown-text)' : 'var(--game-orange-bg)'};">
+        <h2>${isSilent ? '🤫 靜音回合：禁止跨組溝通，只限組內商量' : '🗣️ 自由吹風：隨便走動拉票、結盟、放風！'}</h2>
+        <p style="font-size:1.1rem; font-weight:700; color:#5A4538;">${isSilent ? '先憑直覺同手頭持股，決定一陣點投出你哋組嘅 3 票！' : '記住：賽前「永久光環」越高，中咗第 1、2 名嘅每股派分就越肥仔！'}</p>
+      </div>${renderBoxesGrid()}`;
+  }
+
+  function renderHostPhaseC(root) {
+    root.innerHTML = `${renderTimerBar('階段 C：秘密投票（總分榜已暫時隱藏）', '每組投 3 票，單一黑盒最多 2 票（嚴禁 3-0）')}
+      <div class="card card-highlight" style="text-align:center;">
+        <div class="section-badge" style="background:var(--game-blue-tag); margin-bottom:14px;">🗳️ 已鎖定進度：${gameState.votedCount} / ${gameState.totalTeams} 組</div>
+        <div class="team-pills" style="justify-content:center; margin-bottom:18px;">
+          ${gameState.teams.map(t => `<span class="team-pill ${t.hasVoted ? 'locked' : 'waiting'}">${t.hasVoted ? '✅' : '⏳'} ${escapeHtml(t.name)}</span>`).join('')}
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-orange btn-sm" onclick="sendWs({type:'host_nudge_unvoted'})">📣 催未投票組別</button>
+          <button class="btn btn-brown btn-sm" onclick="sendWs({type:'host_force_end_vote', autoVote:true})">⚡ 強制結算（未投組隨機代投 2-1）</button>
+        </div>
+      </div>
+      <div class="section-badge-wrap" style="margin-top:16px;"><div class="section-badge" style="background:var(--game-taupe-bg); font-size:1rem;">✨ 4 個黑盒賽前永久光環（僅供參考）</div></div>
+      ${renderBoxesGrid()}`;
+  }
+
+  function renderHostPhaseD(root) {
+    const res = gameState.lastResolution; if (!res) return;
+    const sortedTeams = [...gameState.teams].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+    root.innerHTML = `
+      <div class="section-badge-wrap"><div class="section-badge" style="background:var(--game-brown-text);">📊 第 ${gameState.round} 回合公開開票與結算</div></div>
+      ${renderBoxesGrid({ showVotes: true, showWinners: true, aurasOverride: res.preAuras })}
+      <div class="card" style="margin-top:20px; border:4px dashed var(--game-green-bg);">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
+          <div>
+            <h2>💰 本回合得分明細與最新總分榜</h2>
+            <div class="small-muted">🥇 ${BOX_META[res.first].emoji}${res.first}（3+${res.preAuras[res.first]}=<strong>${res.unitValues[res.first]}分/股</strong>）＋ 🥈 ${BOX_META[res.second].emoji}${res.second}（2+${res.preAuras[res.second]}=<strong>${res.unitValues[res.second]}分/股</strong>）</div>
+          </div>
+          <button class="btn btn-pink btn-lg" onclick="SFX.click(); sendWs({type:'host_next'})">${gameState.round >= 3 ? '🏆 進入最終頒獎台' : `➡️ 進入第 ${gameState.round + 1} 回合（清倉重派）`}</button>
+        </div>
+        <div style="overflow-x:auto;"><table class="score-table"><thead><tr><th>排名</th><th>組別</th><th>本回合持股命中</th><th>本回合得分</th><th>累積總分</th></tr></thead><tbody>
+          ${sortedTeams.map((t, idx) => { const bd = res.teamBreakdowns[t.id]; return `<tr><td><strong>#${idx + 1}</strong></td><td><strong>${escapeHtml(t.name)}</strong></td><td style="font-size:0.9rem;">${BOX_META[res.first].emoji}${bd?.firstShares||0}股(${bd?.firstPts||0}分) ＋ ${BOX_META[res.second].emoji}${bd?.secondShares||0}股(${bd?.secondPts||0}分)</td><td style="color:var(--game-green-bg); font-size:1.15rem;"><strong>+${bd?.roundScore||0}</strong></td><td style="color:var(--game-pink-btn); font-size:1.25rem;"><strong>${t.totalScore} 分</strong></td></tr>`; }).join('')}
+        </tbody></table></div>
+        <div style="margin-top:14px; background:#FFF8E6; border-radius:16px; padding:12px 16px; font-weight:800; text-align:center;">🔄 提示：本回合持股已清倉，4 個黑盒嘅「永久光環」會永久保留至下一回合！</div>
+      </div>`;
+  }
+
+  function renderFinalPodium(root) {
+    const ranks = gameState.finalRankings || [];
+    root.innerHTML = `
+      <div class="section-badge-wrap"><div class="section-badge" style="background:var(--game-pink-btn); font-size:1.45rem;">🏆 最終頒獎台 — 黑盒造神總結算</div></div>
+      <div class="podium-grid">
+        ${ranks.slice(0, 3).map(t => `<div class="podium-col ${t.rank === 1 ? 'p1' : ''}"><div style="font-size:2.6rem;">${t.rank === 1 ? '🥇' : t.rank === 2 ? '🥈' : '🥉'}</div><div style="font-size:0.9rem; font-weight:800; color:#7A5C48;">第 ${t.rank} 名</div><div style="font-size:1.45rem; font-weight:900; margin:4px 0;">${escapeHtml(t.name)}</div><div style="font-size:2.1rem; font-weight:900; color:var(--game-pink-btn);">${t.totalScore} 分</div><div class="small-muted">第 3 回合：${t.round3Score} 分</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:12px;">📋 全場 3 回合完整戰績</h2>
+        <div style="overflow-x:auto;"><table class="score-table"><thead><tr><th>名次</th><th>組別</th><th>R1</th><th>R2</th><th>R3</th><th>總分</th></tr></thead><tbody>
+          ${ranks.map(t => `<tr><td><strong>#${t.rank}</strong></td><td><strong>${escapeHtml(t.name)}</strong></td><td>${t.roundScores?.[0]||0}</td><td>${t.roundScores?.[1]||0}</td><td><strong>${t.roundScores?.[2]||0}</strong></td><td style="color:var(--game-pink-btn); font-size:1.2rem;"><strong>${t.totalScore} 分</strong></td></tr>`).join('')}
+        </tbody></table></div>
+        <div style="margin-top:16px;"><h3 style="margin-bottom:10px;">✨ 4 個黑盒最終永久光環</h3>${renderBoxesGrid()}</div>
+      </div>
+      <button class="btn btn-brown btn-sm reveal-subtle-btn" onclick="openModal('reveal-confirm-modal')">🎁 進入拆封揭曉模式（配合實體黑盒）</button>`;
+  }
+
+  function renderRevealScreen(root) {
+    root.innerHTML = `
+      <div class="section-badge-wrap"><div class="section-badge" style="background:#FFFFFF; color:#231914;">🎁 實體黑盒拆封揭曉</div></div>
+      <div style="text-align:center; margin-bottom:24px;">
+        <h1 style="font-size:clamp(1.8rem, 4.5vw, 3rem); font-weight:900; color:#F3C242; margin-bottom:10px;">原來，四個黑盒裡面……全部都係一張白紙。</h1>
+        <p style="font-size:1.15rem; color:#F3E7DB; font-weight:700;">佢哋本身完全一模一樣、毫無內在價值——所有「光環」，都只係我哋剛才一票一票造出嚟。</p>
+      </div>
+      <div class="boxes-grid" style="margin-bottom:28px;">
+        ${BOXES.map(b => `<div class="reveal-paper-card"><div style="font-size:2rem; margin-bottom:6px;">${BOX_META[b].emoji} ${b}</div><div style="font-size:2.8rem; margin:6px 0;">📄</div><div style="font-size:1.2rem; font-weight:900; color:#4A3222;">純白白紙一張</div><div style="font-size:0.88rem; color:#777; margin-top:4px;">最終光環：+${gameState.auras[b]}</div></div>`).join('')}
+      </div>
+      <div class="card" style="background:#FFFBF4; border:4px solid var(--game-yellow-bg);">
+        <h2 style="margin-bottom:14px;">💬 拆封後反思過渡（銜接羅馬書 12:1–2）</h2>
+        <div style="display:flex; flex-direction:column; gap:14px; font-size:1.12rem; font-weight:700;">
+          <div style="background:#FFF3D6; padding:16px 20px; border-radius:18px; border-left:6px solid var(--game-orange-bg);"><strong>Q1：</strong> 剛才喺遊戲入面，明明你由頭到尾都未見過黑盒入面係咩，係咩令你依然咁投入去幫佢拉票、甚至因為佢嘅「光環」而改變自己嘅選擇？</div>
+          <div style="background:#EEF7FD; padding:16px 20px; border-radius:18px; border-left:6px solid var(--game-blue-tag);"><strong>Q2：</strong> 放返喺我哋日常生活（學業、事業、名利、社交媒體認可），有邊啲「黑盒」其實本身都係白紙，但因為群體不斷俾佢「光環」，我哋不知不覺就效法咗呢個世界嘅價值觀？</div>
+          <div style="background:#F3EBF9; padding:18px 20px; border-radius:18px; border-left:6px solid var(--box-astra); color:#3B2358;">📖 <strong>羅馬書 12:1–2</strong><br/>「所以弟兄們，我以神的慈悲勸你們，將身體獻上，當作活祭，是聖潔的，是神所喜悅的；你們如此事奉乃是理所當然的。<strong>不要效法這個世界，只要心意更新而變化，叫你們察驗何為神的善良、純全、可喜悅的旨意。</strong>」</div>
+        </div>
+        ${isHostView() ? `<div style="margin-top:18px; text-align:right;"><button class="btn btn-ghost btn-sm" onclick="sendWs({type:'host_jump_final'})">⬅️ 返回頒獎台</button></div>` : ''}
+      </div>`;
+  }
+
+  function renderPlayerPhone(root) {
+    const me = gameState.myTeam;
+    if (!me) { root.innerHTML = `<div class="card" style="text-align:center;"><h2>⏳ 正在同步你哋組別資料⋯⋯</h2></div>`; return; }
+    const header = `<div class="card" style="padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><div><div class="small-muted">房號 ${escapeHtml(gameState.roomCode)}</div><div style="font-size:1.25rem; font-weight:900;">👥 ${escapeHtml(me.name)}</div></div><div style="background:var(--game-pink-btn); color:#fff; padding:6px 16px; border-radius:9999px; font-weight:900;">總分：${me.totalScore} 分</div></div>`;
+
+    if (gameState.status === 'LOBBY') {
+      root.innerHTML = `${header}<div class="card" style="text-align:center; padding:36px 20px;"><div style="font-size:3rem; margin-bottom:10px;">✅</div><h2>成功入房！等緊主持人開波</h2><p class="small-muted" style="margin-top:8px;">目前已加入 ${gameState.totalTeams} 組，請望住主螢幕等候開始。</p></div>`;
+      return;
+    }
+    if (gameState.status === 'ROUND_A' || gameState.status === 'ROUND_B') {
+      const h = me.holdings || { Sol: 0, Luna: 0, Terra: 0, Astra: 0 };
+      const lbl = gameState.status === 'ROUND_A' ? '階段 A：秘密派股' : (gameState.round === 1 ? '階段 B：🤫 靜音組內商討' : '階段 B：🗣️ 自由走動拉票');
+      root.innerHTML = `${header}${renderTimerBar(lbl, '')}<div class="card">
+        <div class="privacy-shield ${privacyHidden ? 'hidden-mode' : ''}" onclick="privacyHidden=!privacyHidden; SFX.click(); render();">
+          ${privacyHidden ? `<div style="font-size:2.6rem; margin-bottom:8px;">🙈</div><h3>持股已遮蔽（防隔離組偷睇）</h3><p style="margin-top:6px; opacity:0.9;">點一下顯示本回合持股</p>` : `
+          <div style="font-size:0.9rem; font-weight:800; color:var(--game-blue-tag); margin-bottom:12px;">👁️ 本回合秘密持股（點一下再次遮蔽）</div>
+          <div class="boxes-grid">${BOXES.map(b => `<div class="box-card ${BOX_META[b].cls}" style="padding:14px 8px;"><div style="font-size:1.9rem;">${BOX_META[b].emoji}</div><div style="font-weight:900; font-size:1.1rem;">${b}</div><div style="font-size:1.5rem; font-weight:900; margin-top:4px;">${h[b]} 股</div><div style="font-size:0.78rem; opacity:0.9;">${h[b] === 2 ? '🔥 主力' : h[b] === 1 ? '副線' : '空倉'}</div></div>`).join('')}</div>`}
+        </div>
+        <div class="small-muted" style="text-align:center; margin-top:12px;">賽前光環：${BOXES.map(b => `${BOX_META[b].emoji}${b} +${gameState.auras[b]}`).join(' ｜ ')}</div>
+      </div>`;
+      return;
+    }
+    if (gameState.status === 'ROUND_C') {
+      const submitted = me.myVotes, totalSel = BOXES.reduce((s, b) => s + (draftVotes[b] || 0), 0), valid = validateVotes(draftVotes).valid;
+      root.innerHTML = `${header}${renderTimerBar('階段 C：秘密投票', '必須投剛好 3 票，單一黑盒最多 2 票（嚴禁 3-0）')}<div class="card">
+        ${submitted ? `<div style="text-align:center; padding:24px 10px;"><div style="font-size:3rem;">🔒</div><h2 style="margin:8px 0;">已鎖定本回合 3 票！</h2><p class="small-muted">${BOXES.filter(b => submitted[b] > 0).map(b => `${BOX_META[b].emoji}${b} ${submitted[b]}票`).join(' ＋ ')}</p><p class="small-muted" style="margin-top:10px;">等待其他組別完成（${gameState.votedCount}/${gameState.totalTeams} 組已鎖定）⋯⋯</p></div>` : `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><h3>🗳️ 分配你哋組嘅 3 票</h3><span style="background:${totalSel === 3 ? 'var(--game-green-bg)' : 'var(--game-orange-bg)'}; color:#fff; padding:5px 14px; border-radius:9999px; font-weight:900;">已選 ${totalSel} / 3 票</span></div>
+        ${BOXES.map(b => { const m = BOX_META[b], v = draftVotes[b] || 0, h = me.holdings ? me.holdings[b] : 0; return `<div class="vote-row ${m.cls}"><div><div style="font-size:1.2rem; font-weight:900;">${m.emoji} ${b}</div><div style="font-size:0.82rem; opacity:0.92;">光環 +${gameState.auras[b]} ｜ 你哋持有 ${h} 股</div></div><div class="vote-stepper"><button class="vote-btn" ${v <= 0 ? 'disabled' : ''} onclick="adjustVote('${b}', -1)">−</button><div class="vote-count">${v}</div><button class="vote-btn" ${(v >= 2 || totalSel >= 3) ? 'disabled' : ''} onclick="adjustVote('${b}', 1)">+</button></div></div>`; }).join('')}
+        <div class="small-muted" style="text-align:center; margin:10px 0 14px;">⚠️ 單一黑盒上限 2 票（只准 2-1 或 1-1-1），投票不會增加持股。</div>
+        <button class="btn btn-pink btn-lg" style="width:100%;" ${valid ? '' : 'disabled'} onclick="submitPlayerVote()">🔒 確定鎖定這 3 票</button>`}
+      </div>`;
+      return;
+    }
+    if (gameState.status === 'ROUND_D') {
+      const res = gameState.lastResolution, bd = res?.teamBreakdowns?.[me.id];
+      root.innerHTML = `${header}<div class="card" style="text-align:center;"><h2>📊 第 ${gameState.round} 回合結算</h2>
+        ${!gameState.wheelComplete && res?.wheelEvents?.length ? `<div style="padding:24px 10px;"><div style="font-size:3rem;">🎡</div><h3>有黑盒打和！請望主螢幕睇命運轉盤抽籤！</h3></div>` : `
+        <div style="margin:14px 0; font-size:1.15rem; font-weight:900;">🥇 ${BOX_META[res.first].emoji}${res.first}（${res.unitValues[res.first]}分/股）<br/>🥈 ${BOX_META[res.second].emoji}${res.second}（${res.unitValues[res.second]}分/股）</div>
+        <div style="background:#EEF9EC; border-radius:20px; padding:18px; margin:14px 0;"><div class="small-muted">你哋組本回合得分</div><div style="font-size:2.5rem; font-weight:900; color:var(--game-green-bg);">+${bd?.roundScore || 0} 分</div><div class="small-muted" style="margin-top:6px;">${BOX_META[res.first].emoji}${bd?.firstShares||0}股×${res.unitValues[res.first]} ＋ ${BOX_META[res.second].emoji}${bd?.secondShares||0}股×${res.unitValues[res.second]}</div></div>
+        <p class="small-muted">本回合持股已清倉，黑盒光環永久保留。請等候主持人開下一回合。</p>`}
+      </div>`;
+      return;
+    }
+    if (gameState.status === 'FINAL') {
+      const myRank = (gameState.finalRankings || []).find(t => t.id === me.id);
+      root.innerHTML = `${header}<div class="card" style="text-align:center; padding:34px 20px;"><div style="font-size:3.5rem;">🏆</div><h2>遊戲完結！</h2><div style="font-size:1.8rem; font-weight:900; color:var(--game-pink-btn); margin:10px 0;">最終排名：第 ${myRank?.rank || '-'} 名（${me.totalScore} 分）</div><p class="small-muted">請望向主螢幕一齊睇頒獎台！</p></div>`;
+    }
+  }
+
+  function adjustVote(box, delta) {
+    SFX.click();
+    const cur = draftVotes[box] || 0, next = cur + delta, total = BOXES.reduce((s, b) => s + (draftVotes[b] || 0), 0);
+    if (next < 0 || next > 2 || (delta > 0 && total >= 3)) return;
+    draftVotes[box] = next; render();
+  }
+
+  function submitPlayerVote() {
+    const check = validateVotes(draftVotes); if (!check.valid) { showToast('⚠️ ' + check.error); return; }
+    SFX.lock();
+    sendWs({ type: 'submit_vote', votes: { ...draftVotes }, teamId: session.mode === 'demo' ? demoView : session.teamId });
+  }
+
+  function openHostModal() { SFX.click(); renderHostModal(); openModal('host-modal'); }
+
+  function renderHostModal() {
+    const body = document.getElementById('host-modal-body');
+    if (!gameState || (session.mode === 'live' && session.role !== 'host')) {
+      body.innerHTML = `<p style="margin-bottom:14px; font-weight:700;">目前未以主持身份開房。可即刻開單機 Demo 試玩或開線上房：</p><div style="display:flex; gap:10px; flex-wrap:wrap;"><button class="btn btn-yellow" onclick="startDemoMode(5)">🧪 開啟 5 組單機 Demo 模式</button><button class="btn btn-pink" onclick="closeModal('host-modal'); createLiveRoom();">🏟️ 開線上同步房</button></div>`;
+      return;
+    }
+    const teams = gameState.hostTeams || gameState.teams || [];
+    body.innerHTML = `<div style="display:flex; flex-direction:column; gap:16px;">
+      <div style="background:#FAF5F0; padding:14px; border-radius:18px;">
+        <div style="font-weight:900; margin-bottom:10px;">⏯️ 流程與計時控制（目前：${gameState.status} / R${gameState.round}）</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="sendWs({type:'host_pause_toggle'})">${gameState.timerPaused ? '▶️ 繼續倒數' : '⏸️ 暫停倒數'}</button>
+          <button class="btn btn-blue btn-sm" onclick="sendWs({type:'host_extend_timer', seconds:15})">+15 秒</button>
+          <button class="btn btn-pink btn-sm" onclick="sendWs({type:'host_next'})">⏭️ 跳至下一階段</button>
+          <button class="btn btn-yellow btn-sm" onclick="sendWs({type:'host_jump_final'}); closeModal('host-modal');">🏆 直跳最終結算</button>
+        </div>
+        ${gameState.status === 'ROUND_C' ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"><button class="btn btn-orange btn-sm" onclick="sendWs({type:'host_nudge_unvoted'})">📣 催未投票組別</button><button class="btn btn-brown btn-sm" onclick="sendWs({type:'host_force_end_vote', autoVote:true}); closeModal('host-modal');">⚡ 強制結束投票（隨機代投 2-1）</button></div>` : ''}
+      </div>
+      <div style="background:#FAF5F0; padding:14px; border-radius:18px;">
+        <div style="font-weight:900; margin-bottom:10px;">👥 組別管理與手動加減分（+/- Override）</div>
+        ${teams.length === 0 ? '<div class="small-muted">未有組別入房</div>' : teams.map(t => `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 0; border-bottom:1px dashed #DFCFC2; flex-wrap:wrap;"><div><strong>${escapeHtml(t.name)}</strong> <span class="small-muted">（總分 ${t.totalScore ?? 0}${t.manualDelta ? `，手動 ${t.manualDelta > 0 ? '+' : ''}${t.manualDelta}` : ''}）</span></div><div style="display:flex; gap:6px;"><button class="btn btn-ghost btn-sm" style="padding:4px 10px;" onclick="sendWs({type:'host_adjust_score', teamId:'${t.id}', delta:-1})">−1</button><button class="btn btn-green btn-sm" style="padding:4px 10px;" onclick="sendWs({type:'host_adjust_score', teamId:'${t.id}', delta:1})">+1</button><button class="btn btn-blue btn-sm" style="padding:4px 10px;" onclick="promptRename('${t.id}', '${escapeHtml(t.name)}')">✏️</button>${gameState.status === 'LOBBY' ? `<button class="btn btn-orange btn-sm" style="padding:4px 10px;" onclick="sendWs({type:'host_kick_team', teamId:'${t.id}'})">🗑️</button>` : ''}</div></div>`).join('')}
+      </div>
+      <div style="background:#FFF8E6; padding:14px; border-radius:18px; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center;">
+        <span style="font-weight:800;">🧪 快速單機模擬測試</span>
+        <div style="display:flex; gap:6px;">${[4, 5, 6].map(n => `<button class="btn btn-yellow btn-sm" onclick="startDemoMode(${n})">${n} 組 Demo</button>`).join('')}</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <button class="btn btn-brown btn-sm" onclick="closeModal('host-modal'); openModal('reveal-confirm-modal');">🎁 拆封揭曉模式</button>
+        <button class="btn btn-ghost btn-sm" onclick="if(confirm('確定重設房間並保留現有組別？')){ sendWs({type:'host_reset', keepTeams:true}); closeModal('host-modal'); }">🔄 重設回合（保留組別）</button>
+      </div>
+    </div>`;
+  }
+
+  function promptRename(teamId, oldName) { const n = prompt('輸入新隊名：', oldName); if (n && n.trim()) sendWs({ type: 'host_rename_team', teamId, newName: n.trim() }); }
+  function confirmEnterReveal() { closeModal('reveal-confirm-modal'); sendWs({ type: 'host_enter_reveal' }); }
+
+  function getJoinUrl() {
+    const u = new URL(window.location.href);
+    if (gameState && gameState.roomCode && gameState.roomCode !== 'DEMO') u.searchParams.set('room', gameState.roomCode);
+    else u.searchParams.delete('room');
+    return u.toString();
+  }
+
+  function renderQrInto(elId, size = 210) {
+    const el = document.getElementById(elId); if (!el) return;
+    el.innerHTML = '';
+    const url = getJoinUrl();
+    if (typeof QRCode !== 'undefined') new QRCode(el, { text: url, width: size, height: size, colorDark: '#4A3222', colorLight: '#FFFFFF' });
+    else el.innerHTML = `<div style="padding:16px; font-weight:800; word-break:break-all;">${escapeHtml(url)}</div>`;
+  }
+
+  function openQrModal() {
+    SFX.click(); openModal('qr-modal');
+    document.getElementById('qr-room-pill').innerHTML = gameState?.roomCode ? `<span class="section-badge" style="font-size:1rem; padding:6px 18px;">房號：${escapeHtml(gameState.roomCode)}</span>` : '';
+    renderQrInto('qr-box', 220);
+  }
+  function copyJoinUrl() { navigator.clipboard?.writeText(getJoinUrl()).then(() => showToast('📋 已複製入房連結！')); }
+
+  function openSettingsModal() {
+    SFX.click();
+    document.getElementById('worker-url-input').value = appSettings.workerUrl || DEFAULT_WORKER_URL;
+    document.getElementById('mute-toggle-btn').textContent = appSettings.muted ? '🔇 音效已靜音' : '🔊 音效已開啟';
+    if (gameState?.timers) {
+      document.getElementById('t-phaseA').value = gameState.timers.phaseA;
+      document.getElementById('t-phaseB1').value = gameState.timers.phaseB_R1;
+      document.getElementById('t-phaseB23').value = gameState.timers.phaseB_R23;
+      document.getElementById('t-phaseC').value = gameState.timers.phaseC;
+    }
+    openModal('settings-modal');
+  }
+
+  function toggleMute() {
+    appSettings.muted = !appSettings.muted;
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(appSettings));
+    document.getElementById('mute-toggle-btn').textContent = appSettings.muted ? '🔇 音效已靜音' : '🔊 音效已開啟';
+    if (!appSettings.muted) SFX.click();
+  }
+
+  function saveSettings() {
+    appSettings.workerUrl = (document.getElementById('worker-url-input').value || DEFAULT_WORKER_URL).trim();
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(appSettings));
+    if (gameState && isHostView()) {
+      sendWs({ type: 'host_update_timers', timers: {
+        phaseA: Number(document.getElementById('t-phaseA').value) || 15,
+        phaseB_R1: Number(document.getElementById('t-phaseB1').value) || 45,
+        phaseB_R23: Number(document.getElementById('t-phaseB23').value) || 60,
+        phaseC: Number(document.getElementById('t-phaseC').value) || 30
+      }});
+    }
+    closeModal('settings-modal'); showToast('💾 設定已儲存！');
+  }
+
+  function handleRestartClick() { SFX.click(); if (session.mode === 'landing') { showToast('目前已經係主頁'); return; } if (confirm('確定要退出目前房間並返回主頁？')) leaveToLanding(); }
+
+  function leaveToLanding() {
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    clearTimeout(wsReconnectTimer);
+    session = { mode: 'landing', role: null, roomCode: '', hostToken: '', teamId: '', teamName: '', token: '' };
+    gameState = null; demoRoom = null; activeWheelRoundKey = '';
+    localStorage.removeItem(STORAGE_KEYS.session); localStorage.removeItem(STORAGE_KEYS.demo);
+    render();
+  }
+
+  function getRemainingSeconds() {
+    if (!gameState) return 0;
+    if (gameState.timerPaused) return Math.ceil((gameState.timerRemainingMs || 0) / 1000);
+    if (!gameState.timerEndsAt) return 0;
+    return Math.max(0, Math.ceil((gameState.timerEndsAt - Date.now()) / 1000));
+  }
+
+  setInterval(() => {
+    const el = document.getElementById('live-timer-digits'); if (!el || !gameState) return;
+    const sec = getRemainingSeconds();
+    el.textContent = `${gameState.timerPaused ? '⏸️ ' : ''}${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+    el.classList.toggle('urgent', sec > 0 && sec <= 10 && !gameState.timerPaused);
+    if (isHostView() && !gameState.timerPaused && sec > 0 && sec <= 5 && sec !== lastBeepSec) { lastBeepSec = sec; SFX.tick(true); }
+  }, 300);
+
+  function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  (function boot() {
+    const urlRoom = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.session) || 'null');
+      if (saved && saved.mode === 'demo') {
+        const dr = JSON.parse(localStorage.getItem(STORAGE_KEYS.demo) || 'null');
+        if (dr) { session = saved; demoRoom = dr; syncDemoSnapshot(); return; }
+      } else if (saved && saved.mode === 'live' && saved.roomCode && (!urlRoom || urlRoom === saved.roomCode)) {
+        session = saved; connectLiveWs(); render(); return;
+      }
+    } catch (_) {}
+    render();
+  })();
+  </script>
+
+  
+
+</body></html>
